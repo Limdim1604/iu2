@@ -7,7 +7,7 @@ var imgHeight = 170; // height of images (unit: px)
 
 // Link of background music - set 'null' if you dont want to play background music
 // Đường dẫn tới file nhạc trên GitHub - giả định bạn đã upload lên repo
-var bgMusicURL = 'https://raw.githubusercontent.com/username/repository/main/music/song.mp3'; 
+var bgMusicURL = 'https://raw.githubusercontent.com/Limdim1604/iu2/main/mai_mai_ben_nhau.mp3'; 
 var bgMusicControls = true; // Show UI music control
 
 // ===================== start =======================
