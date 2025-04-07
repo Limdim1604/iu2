@@ -65,6 +65,15 @@ if (bgMusicURL) {
   musicContainer.innerHTML += `<audio id="bg-audio" src="${bgMusicURL}" autoplay ${bgMusicControls ? 'controls' : ''} loop></audio>`;
 }
 
+document.addEventListener('click', function() {
+  var audio = document.getElementById('bg-audio');
+  if (audio && audio.paused) {
+    audio.play().catch(function(err) {
+      console.error("Không thể phát nhạc:", err);
+    });
+  }
+});
+
 // =================== XỬ LÝ SỰ KIỆN VỚI CON TRỎ ===================
 
 document.onpointerdown = function (e) {
