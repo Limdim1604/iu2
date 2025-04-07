@@ -6,10 +6,9 @@ var imgWidth = 120; // width of images (unit: px)
 var imgHeight = 170; // height of images (unit: px)
 
 // Link of background music - set 'null' if you dont want to play background music
-var bgMusicURL = 'https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/monsieur-dat/mai-mai-ben-nhau-beat&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true';
+// Đường dẫn tới file nhạc trên GitHub - giả định bạn đã upload lên repo
+var bgMusicURL = 'https://raw.githubusercontent.com/username/repository/main/music/song.mp3'; 
 var bgMusicControls = true; // Show UI music control
-
-
 
 // ===================== start =======================
 // animation start after 1000 miliseconds
@@ -62,33 +61,45 @@ if (autoRotate) {
   ospin.style.animation = `${animationName} ${Math.abs(rotateSpeed)}s infinite linear`;
 }
 
-
+// Phần này được thay đổi để sử dụng thẻ audio HTML5 thay vì SoundCloud
 if (bgMusicURL) {
   document.getElementById('music-container').innerHTML += `
-<iframe id="sc-player" width="100%" height="100" frameborder="no" allow="autoplay"
-src="${bgMusicURL}">
-</iframe>
-`;
+    <audio id="background-music" ${bgMusicControls ? 'controls' : ''} loop>
+      <source src="${bgMusicURL}" type="audio/mpeg">
+      Trình duyệt của bạn không hỗ trợ phát nhạc.
+    </audio>
+  `;
+  
+  // Thiết lập vị trí bắt đầu và tự động phát
+  var audioElement = document.getElementById('background-music');
+  
+  // Khi audio đã sẵn sàng để phát
+  audioElement.addEventListener('canplaythrough', function() {
+    audioElement.currentTime = 3; // Bắt đầu từ giây thứ 3
+    
+    // Thử phát nhạc
+    var playPromise = audioElement.play();
+    
+    // Xử lý trường hợp trình duyệt chặn autoplay
+    if (playPromise !== undefined) {
+      playPromise.then(_ => {
+        // Phát nhạc thành công
+        console.log("Đang phát nhạc");
+      })
+      .catch(error => {
+        // Tự động phát bị chặn
+        console.log("Tự động phát nhạc bị chặn. Vui lòng click vào trang để phát nhạc.");
+        
+        // Thêm sự kiện click để phát nhạc khi người dùng tương tác
+        document.addEventListener('click', function() {
+          audioElement.play();
+        }, { once: true });
+      });
+    }
+  });
 }
 
-
-
-// Thêm script SoundCloud API
-var script = document.createElement('script');
-script.src = 'https://w.soundcloud.com/player/api.js';
-document.body.appendChild(script);
-
-script.onload = function () {
-  var iframe = document.getElementById('sc-player');
-  var widget = SC.Widget(iframe);
-
-  widget.bind(SC.Widget.Events.READY, function () {
-    widget.seekTo(3000); // Bắt đầu từ giây thứ 3 (3000ms)
-  });
-};
-
-
-
+// Rest of your code remains unchanged
 // setup events
 document.onpointerdown = function (e) {
   clearInterval(odrag.timer);
@@ -134,7 +145,6 @@ document.onmousewheel = function(e) {
   radius += d;
   init(1);
 };
-
 
 
 
