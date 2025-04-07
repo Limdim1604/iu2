@@ -7,8 +7,9 @@ var imgWidth = 120; // Chiều rộng ảnh (px)
 var imgHeight = 170; // Chiều cao ảnh (px)
 
 // Link nhạc nền từ GitHub - đặt 'null' nếu không muốn phát nhạc nền
-var bgMusicURL ='https://raw.githubusercontent.com/Limdim1604/iu2/main/mai_mai_ben_nhau.mp3';
+var bgMusicURL = 'https://raw.githubusercontent.com/Limdim1604/iu2/main/mai_mai_ben_nhau.mp3';
 var bgMusicControls = true; // Hiển thị thanh điều khiển nhạc
+var musicPlayed = false; // Kiểm tra nhạc đã được phát hay chưa
 
 // =================== KHỞI TẠO ===================
 setTimeout(init, 1000);
@@ -27,6 +28,79 @@ ospin.style.height = imgHeight + "px";
 var ground = document.getElementById('ground');
 ground.style.width = radius * 3 + "px";
 ground.style.height = radius * 3 + "px";
+
+// =================== THÊM NHẠC NỀN ===================
+function setupMusic() {
+  if (bgMusicURL) {
+    var musicContainer = document.getElementById('music-container');
+    if (!musicContainer) {
+      musicContainer = document.createElement('div');
+      musicContainer.id = 'music-container';
+      document.body.appendChild(musicContainer);
+    }
+    
+    // Tạo thẻ audio nếu chưa có
+    if (!document.getElementById('bg-audio')) {
+      musicContainer.innerHTML = `
+        <audio id="bg-audio" src="${bgMusicURL}" ${bgMusicControls ? 'controls' : ''} loop preload="auto"></audio>
+        <div id="music-notice" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+          background-color: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 5px; 
+          z-index: 1000; cursor: pointer; display: ${musicPlayed ? 'none' : 'block'}">
+          Nhấp vào đây để phát nhạc nền
+        </div>
+      `;
+      
+      // Thêm xử lý sự kiện cho thông báo
+      var musicNotice = document.getElementById('music-notice');
+      if (musicNotice) {
+        musicNotice.addEventListener('click', playMusic);
+      }
+    }
+  }
+}
+
+// Hàm phát nhạc
+function playMusic() {
+  var audio = document.getElementById('bg-audio');
+  if (audio && !musicPlayed) {
+    audio.play().then(() => {
+      musicPlayed = true;
+      var musicNotice = document.getElementById('music-notice');
+      if (musicNotice) {
+        musicNotice.style.display = 'none';
+      }
+    }).catch(function(err) {
+      console.error("Không thể phát nhạc:", err);
+    });
+  }
+}
+
+// Thiết lập nhạc
+setupMusic();
+
+// Xử lý sự kiện người dùng để phát nhạc
+function setupUserInteractionEvents() {
+  // Mảng các loại sự kiện để phát nhạc
+  var events = ['click', 'touchstart', 'keydown', 'mousedown'];
+  
+  function handleUserInteraction() {
+    playMusic();
+    // Gỡ bỏ tất cả các event listener sau khi nhạc đã phát
+    if (musicPlayed) {
+      events.forEach(event => {
+        document.removeEventListener(event, handleUserInteraction);
+      });
+    }
+  }
+  
+  // Thêm các event listener
+  events.forEach(event => {
+    document.addEventListener(event, handleUserInteraction);
+  });
+}
+
+// Thiết lập sự kiện người dùng
+setupUserInteractionEvents();
 
 // Hàm khởi tạo sắp xếp vị trí các phần tử xung quanh vòng tròn
 function init(delayTime) {
@@ -57,22 +131,6 @@ if (autoRotate) {
   var animationName = (rotateSpeed > 0 ? 'spin' : 'spinRevert');
   ospin.style.animation = `${animationName} ${Math.abs(rotateSpeed)}s infinite linear`;
 }
-
-// =================== THÊM NHẠC NỀN ===================
-// Sử dụng thẻ audio để tự động phát nhạc
-if (bgMusicURL) {
-  var musicContainer = document.getElementById('music-container');
-  musicContainer.innerHTML += `<audio id="bg-audio" src="${bgMusicURL}" autoplay ${bgMusicControls ? 'controls' : ''} loop></audio>`;
-}
-
-document.addEventListener('click', function() {
-  var audio = document.getElementById('bg-audio');
-  if (audio && audio.paused) {
-    audio.play().catch(function(err) {
-      console.error("Không thể phát nhạc:", err);
-    });
-  }
-});
 
 // =================== XỬ LÝ SỰ KIỆN VỚI CON TRỎ ===================
 
