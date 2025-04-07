@@ -1,34 +1,34 @@
-// You can change global variables here:
-var radius = 240; // how big of the radius
-var autoRotate = true; // auto rotate or not
-var rotateSpeed = -60; // unit: seconds/360 degrees
-var imgWidth = 120; // width of images (unit: px)
-var imgHeight = 170; // height of images (unit: px)
+// =================== THIẾT LẬP CÁC BIẾN TOÀN CỤC ===================
+// Thay đổi các biến toàn cục tại đây:
+var radius = 240; // Bán kính vòng tròn
+var autoRotate = true; // Tự động quay hay không
+var rotateSpeed = -60; // Đơn vị: giây/360 độ
+var imgWidth = 120; // Chiều rộng ảnh (px)
+var imgHeight = 170; // Chiều cao ảnh (px)
 
-// Link of background music - set 'null' if you dont want to play background music
-// Đường dẫn tới file nhạc trên GitHub - giả định bạn đã upload lên repo
-var bgMusicURL = 'https://raw.githubusercontent.com/Limdim1604/iu2/main/mai_mai_ben_nhau.mp3'; 
-var bgMusicControls = true; // Show UI music control
+// Link nhạc nền từ GitHub - đặt 'null' nếu không muốn phát nhạc nền
+var bgMusicURL ='https://raw.githubusercontent.com/Limdim1604/iu2/main/mai_mai_ben_nhau.mp3';
+var bgMusicControls = true; // Hiển thị thanh điều khiển nhạc
 
-// ===================== start =======================
-// animation start after 1000 miliseconds
+// =================== KHỞI TẠO ===================
 setTimeout(init, 1000);
 
 var odrag = document.getElementById('drag-container');
 var ospin = document.getElementById('spin-container');
 var aImg = ospin.getElementsByTagName('img');
 var aVid = ospin.getElementsByTagName('video');
-var aEle = [...aImg, ...aVid]; // combine 2 arrays
+var aEle = [...aImg, ...aVid]; // Kết hợp 2 mảng
 
-// Size of images
+// Cài đặt kích thước cho container ảnh
 ospin.style.width = imgWidth + "px";
 ospin.style.height = imgHeight + "px";
 
-// Size of ground - depend on radius
+// Cài đặt kích thước cho phần ground dựa trên bán kính
 var ground = document.getElementById('ground');
 ground.style.width = radius * 3 + "px";
 ground.style.height = radius * 3 + "px";
 
+// Hàm khởi tạo sắp xếp vị trí các phần tử xung quanh vòng tròn
 function init(delayTime) {
   for (var i = 0; i < aEle.length; i++) {
     aEle[i].style.transform = "rotateY(" + (i * (360 / aEle.length)) + "deg) translateZ(" + radius + "px)";
@@ -37,70 +37,36 @@ function init(delayTime) {
   }
 }
 
+// Hàm áp dụng biến đổi (transform) dựa trên góc xoay
 function applyTranform(obj) {
-  // Constrain the angle of camera (between 0 and 180)
+  // Giới hạn góc quay của camera (0 đến 180 độ)
   if(tY > 180) tY = 180;
   if(tY < 0) tY = 0;
-
-  // Apply the angle
   obj.style.transform = "rotateX(" + (-tY) + "deg) rotateY(" + (tX) + "deg)";
 }
 
+// Hàm điều khiển quay
 function playSpin(yes) {
-  ospin.style.animationPlayState = (yes?'running':'paused');
+  ospin.style.animationPlayState = (yes ? 'running' : 'paused');
 }
 
-var sX, sY, nX, nY, desX = 0,
-    desY = 0,
-    tX = 0,
-    tY = 10;
+var sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 10;
 
-// auto spin
+// Nếu autoRotate được bật, áp dụng hiệu ứng quay
 if (autoRotate) {
   var animationName = (rotateSpeed > 0 ? 'spin' : 'spinRevert');
   ospin.style.animation = `${animationName} ${Math.abs(rotateSpeed)}s infinite linear`;
 }
 
-// Phần này được thay đổi để sử dụng thẻ audio HTML5 thay vì SoundCloud
+// =================== THÊM NHẠC NỀN ===================
+// Sử dụng thẻ audio để tự động phát nhạc
 if (bgMusicURL) {
-  document.getElementById('music-container').innerHTML += `
-    <audio id="background-music" ${bgMusicControls ? 'controls' : ''} loop>
-      <source src="${bgMusicURL}" type="audio/mpeg">
-      Trình duyệt của bạn không hỗ trợ phát nhạc.
-    </audio>
-  `;
-  
-  // Thiết lập vị trí bắt đầu và tự động phát
-  var audioElement = document.getElementById('background-music');
-  
-  // Khi audio đã sẵn sàng để phát
-  audioElement.addEventListener('canplaythrough', function() {
-    audioElement.currentTime = 3; // Bắt đầu từ giây thứ 3
-    
-    // Thử phát nhạc
-    var playPromise = audioElement.play();
-    
-    // Xử lý trường hợp trình duyệt chặn autoplay
-    if (playPromise !== undefined) {
-      playPromise.then(_ => {
-        // Phát nhạc thành công
-        console.log("Đang phát nhạc");
-      })
-      .catch(error => {
-        // Tự động phát bị chặn
-        console.log("Tự động phát nhạc bị chặn. Vui lòng click vào trang để phát nhạc.");
-        
-        // Thêm sự kiện click để phát nhạc khi người dùng tương tác
-        document.addEventListener('click', function() {
-          audioElement.play();
-        }, { once: true });
-      });
-    }
-  });
+  var musicContainer = document.getElementById('music-container');
+  musicContainer.innerHTML += `<audio id="bg-audio" src="${bgMusicURL}" autoplay ${bgMusicControls ? 'controls' : ''} loop></audio>`;
 }
 
-// Rest of your code remains unchanged
-// setup events
+// =================== XỬ LÝ SỰ KIỆN VỚI CON TRỎ ===================
+
 document.onpointerdown = function (e) {
   clearInterval(odrag.timer);
   e = e || window.event;
@@ -139,6 +105,7 @@ document.onpointerdown = function (e) {
   return false;
 };
 
+// Sự kiện thay đổi bán kính khi cuộn chuột
 document.onmousewheel = function(e) {
   e = e || window.event;
   var d = e.wheelDelta / 20 || -e.detail;
@@ -146,39 +113,22 @@ document.onmousewheel = function(e) {
   init(1);
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// =================== PHẦN WEBGL VÀ SHADER ===================
 
 var canvas = document.getElementById("canvas");
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Initialize the GL context
+// Khởi tạo ngữ cảnh WebGL
 var gl = canvas.getContext('webgl');
-if(!gl){
-  console.error("Unable to initialize WebGL.");
+if (!gl) {
+  console.error("Không thể khởi tạo WebGL.");
 }
 
-//Time
+// Thời gian để animation shader
 var time = 0.0;
 
-//************** Shader sources **************
-
+//************** Nguồn shader **************
 var vertexSource = `
 attribute vec2 position;
 void main() {
@@ -203,8 +153,7 @@ const float len = 0.25;
 float intensity = 1.3;
 float radius = 0.008;
 
-//https://www.shadertoy.com/view/MlKcDD
-//Signed distance to a quadratic bezier
+// Hàm tính khoảng cách điểm đến đường cong bezier bậc hai
 float sdBezier(vec2 pos, vec2 A, vec2 B, vec2 C){    
 	vec2 a = B - A;
 	vec2 b = A - 2.0*B + C;
@@ -230,7 +179,6 @@ float sdBezier(vec2 pos, vec2 A, vec2 B, vec2 C){
 		float t = uv.x + uv.y - kx;
 		t = clamp( t, 0.0, 1.0 );
 
-		// 1 root
 		vec2 qos = d + (c + b*t)*t;
 		res = length(qos);
 	}else{
@@ -241,7 +189,6 @@ float sdBezier(vec2 pos, vec2 A, vec2 B, vec2 C){
 		vec3 t = vec3(m + m, -n - m, n - m) * z - kx;
 		t = clamp( t, 0.0, 1.0 );
 
-		// 3 roots
 		vec2 qos = d + (c + b*t.x)*t.x;
 		float dis = dot(qos,qos);
         
@@ -261,19 +208,19 @@ float sdBezier(vec2 pos, vec2 A, vec2 B, vec2 C){
 	return res;
 }
 
-
-//http://mathworld.wolfram.com/HeartCurve.html
+// Hàm tính vị trí theo đường cong tim
 vec2 getHeartPosition(float t){
 	return vec2(16.0 * sin(t) * sin(t) * sin(t),
 							-(13.0 * cos(t) - 5.0 * cos(2.0*t)
 							- 2.0 * cos(3.0*t) - cos(4.0*t)));
 }
 
-//https://www.shadertoy.com/view/3s3GDn
+// Hàm tạo hiệu ứng phát sáng
 float getGlow(float dist, float radius, float intensity){
 	return pow(radius/dist, intensity);
 }
 
+// Hàm tính đoạn đường cong
 float getSegment(float t, vec2 pos, float offset, float scale){
 	for(int i = 0; i < POINT_COUNT; i++){
 		points[i] = getHeartPosition(offset + float(i)*len + fract(speed * t) * 6.28);
@@ -284,7 +231,6 @@ float getSegment(float t, vec2 pos, float offset, float scale){
 	float dist = 10000.0;
     
 	for(int i = 0; i < POINT_COUNT-1; i++){
-		//https://tinyurl.com/y2htbwkm
 		c_prev = c;
 		c = (points[i] + points[i+1]) / 2.0;
 		dist = min(dist, sdBezier(pos, scale * c_prev, scale * points[i], scale * c));
@@ -298,47 +244,34 @@ void main(){
 	vec2 centre = vec2(0.5, 0.5);
 	vec2 pos = centre - uv;
 	pos.y /= widthHeightRatio;
-	//Shift upwards to centre heart
 	pos.y += 0.02;
 	float scale = 0.000015 * height;
 	
 	float t = time;
     
-	//Get first segment
   float dist = getSegment(t, pos, 0.0, scale);
   float glow = getGlow(dist, radius, intensity);
   
   vec3 col = vec3(0.0);
 
-	//White core
-  col += 10.0*vec3(smoothstep(0.003, 0.001, dist));
-  //Pink glow
+	col += 10.0*vec3(smoothstep(0.003, 0.001, dist));
   col += glow * vec3(1.0,0.05,0.3);
   
-  //Get second segment
   dist = getSegment(t, pos, 3.4, scale);
   glow = getGlow(dist, radius, intensity);
   
-  //White core
   col += 10.0*vec3(smoothstep(0.003, 0.001, dist));
-  //Blue glow
   col += glow * vec3(0.1,0.4,1.0);
         
-	//Tone mapping
 	col = 1.0 - exp(-col);
-
-	//Gamma
 	col = pow(col, vec3(0.4545));
-
-	//Output to screen
  	gl_FragColor = vec4(col,1.0);
 }
 `;
 
-//************** Utility functions **************
+// ************** Các hàm tiện ích cho WebGL **************
 
 window.addEventListener('resize', onWindowResize, false);
-
 function onWindowResize(){
   canvas.width  = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -347,8 +280,7 @@ function onWindowResize(){
   gl.uniform1f(heightHandle, window.innerHeight);
 }
 
-
-//Compile shader and combine with source
+// Hàm biên dịch shader
 function compileShader(shaderSource, shaderType){
   var shader = gl.createShader(shaderType);
   gl.shaderSource(shader, shaderSource);
@@ -359,39 +291,34 @@ function compileShader(shaderSource, shaderType){
   return shader;
 }
 
-//From https://codepen.io/jlfwong/pen/GqmroZ
-//Utility to complain loudly if we fail to find the attribute/uniform
+// Hàm lấy vị trí attribute
 function getAttribLocation(program, name) {
   var attributeLocation = gl.getAttribLocation(program, name);
   if (attributeLocation === -1) {
-  	throw 'Cannot find attribute ' + name + '.';
+  	throw 'Không tìm thấy attribute ' + name + '.';
   }
   return attributeLocation;
 }
 
+// Hàm lấy vị trí uniform
 function getUniformLocation(program, name) {
-  var attributeLocation = gl.getUniformLocation(program, name);
-  if (attributeLocation === -1) {
-  	throw 'Cannot find uniform ' + name + '.';
+  var uniformLocation = gl.getUniformLocation(program, name);
+  if (uniformLocation === -1) {
+  	throw 'Không tìm thấy uniform ' + name + '.';
   }
-  return attributeLocation;
+  return uniformLocation;
 }
 
-//************** Create shaders **************
-
-//Create vertex and fragment shaders
+// ************** Tạo shaders và chương trình **************
 var vertexShader = compileShader(vertexSource, gl.VERTEX_SHADER);
 var fragmentShader = compileShader(fragmentSource, gl.FRAGMENT_SHADER);
-
-//Create shader programs
 var program = gl.createProgram();
 gl.attachShader(program, vertexShader);
 gl.attachShader(program, fragmentShader);
 gl.linkProgram(program);
-
 gl.useProgram(program);
 
-//Set up rectangle covering entire canvas 
+// Thiết lập dữ liệu vertex cho hình chữ nhật phủ toàn bộ canvas
 var vertexData = new Float32Array([
   -1.0,  1.0, 	// top left
   -1.0, -1.0, 	// bottom left
@@ -399,24 +326,20 @@ var vertexData = new Float32Array([
    1.0, -1.0, 	// bottom right
 ]);
 
-//Create vertex buffer
 var vertexDataBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, vertexDataBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
 
-// Layout of our data in the vertex buffer
 var positionHandle = getAttribLocation(program, 'position');
-
 gl.enableVertexAttribArray(positionHandle);
 gl.vertexAttribPointer(positionHandle,
-  2, 				// position is a vec2 (2 values per component)
-  gl.FLOAT, // each component is a float
-  false, 		// don't normalize values
-  2 * 4, 		// two 4 byte float components per vertex (32 bit float is 4 bytes)
-  0 				// how many bytes inside the buffer to start from
-  );
+  2,         // vec2 có 2 giá trị
+  gl.FLOAT,  // mỗi giá trị là float
+  false,
+  2 * 4,     // 2 giá trị, mỗi giá trị 4 byte
+  0
+);
 
-//Set uniform handle
 var timeHandle = getUniformLocation(program, 'time');
 var widthHandle = getUniformLocation(program, 'width');
 var heightHandle = getUniformLocation(program, 'height');
@@ -427,21 +350,15 @@ gl.uniform1f(heightHandle, window.innerHeight);
 var lastFrame = Date.now();
 var thisFrame;
 
-function draw(){
-	
-  //Update time
+// Hàm vẽ khung hình cho WebGL
+function draw(){	
 	thisFrame = Date.now();
-  time += (thisFrame - lastFrame)/1000;	
+  time += (thisFrame - lastFrame) / 1000;	
 	lastFrame = thisFrame;
 
-	//Send uniforms to program
-  gl.uniform1f(timeHandle, time);
-  //Draw a triangle strip connecting vertices 0-4
+	gl.uniform1f(timeHandle, time);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
   requestAnimationFrame(draw);
 }
 
 draw();
-
-
